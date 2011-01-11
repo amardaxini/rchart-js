@@ -861,7 +861,7 @@ Rchart.fn.drawLegend =function(){
             else
             {
                 this.drawFilledRoundedRectangle(xPos+1,yPos+2,xPos+maxWidth+5,yPos+maxHeight+5,5,borderColor);
-               this.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
+                this.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
 
             }
         }
@@ -971,7 +971,29 @@ Rchart.fn.drawBarGraph = function(){
         }
     }
 };
+Rchart.fn.drawStackedBarGraph = function()
+{
+    var stackedBar = this.data["graph"]["stackedBar"];
 
+    var noSeries = stackedBar["values"];
+
+    var seriesWidth  = this.divisionWidth * 0.8;
+    var seriesOfValues =[];
+    for(var i=0;i<noSeries.length;i++)
+    {
+        seriesOfValues[i] = this.findSeriesValues(noSeries[i]);
+    }
+    for(j=0;j<noSeries.length;j++)
+    {
+        for(i=0;i<noSeries.length;i++)
+        {
+            seriesOfValues[i]
+            this.context.beginPath();
+            this.drawFilledRectangle(x1+1,y1,x2-1,y2,barColor);
+
+        }
+    }
+};
 Rchart.fn.drawAnimatedRectangle = function(x1,y1,x2,y2,color){
     var instant =this;
     this._intID = setTimeout(function() { instant.drawFilledRectangle(x1,y1+1,x2,y2,color); }, 1000);
@@ -1146,3 +1168,4 @@ min = function(n1,n2) {
 function roundOf(num, dec) { // Arguments: number to round, number of decimal places
     return Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
 }
+

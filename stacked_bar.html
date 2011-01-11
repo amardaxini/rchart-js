@@ -1,0 +1,113 @@
+<html>
+<head>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="rchart.js"></script>
+  <script type="text/javascript" src="excanvas.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var x ={
+
+        "series":[
+          {
+            "name":"series1",
+            "value":[-2,1,2,3,8],
+            "color":"#DDDF0D"
+
+          },
+          {
+            "name":"series2",
+            "value":[2,4,6,8],
+            "color":"#7798BF"
+          },
+          {
+            "name":"series4",
+            "value":[0,1,3,4,5],
+            "color":"#55BF3B"
+          },
+          {
+            "name":"series3",
+            "value":["Jan","Feb","March","April","May"]
+          }
+        ],
+        "xLabelSeries":"series3",
+        "axis" :
+        {
+          // Text Options In General
+          // "text" : "Text","font" : "Arial","stroke" : true,fontSize":10
+          // "strokeColor" : "#000000","lineWidth" : "#000000","align": "center"
+          "x":{"value":{"text":"Name Of x axis"}},
+          "xLabel":{"values":"labelSeries"},
+          "y":{"value":{"text":"Name Of y AXIS dsdsdd d sdd dd dhshds dsd"}}
+        },
+
+        "legend":{
+          "series":["series1","series2","series4"],
+          "xPos":600,
+          "yPos":70,
+          "textOptions":{"color":"#000000","font":"Arial","fontSize":10},
+          "border":true,
+          "backgroundColor":"#ffffff",
+          "borderColor":"#dddddd",
+          "legendAlign":"vertical"
+
+        },
+        "graph" :{
+          "stackedBar":{
+            "values" : ["series1","series2","series4"],
+            "gutterWidth": 10,
+            "labels":"series3"
+            //             "border":"#aaeeee"
+            //"color" : ["#DDDF0D", "#7798BF", "#55BF3B", "#DF5353", "#aaeeee"]
+          },
+          "line":
+          {
+            "values" : "series2"
+          }
+        }
+
+
+      };
+
+      var rchart = new Rchart("example1",x);
+     // rchart.setBackGroundImage("chart_bg.jpg");
+      rchart.setGraphArea(50,30,585,200);
+      rchart.drawFilledRoundedRectangle(7,7,693,223,5,"#f0f0f0");
+      rchart.drawRoundedRectangle(5,5,695,225,5,"#e6e6e6");
+      rchart.drawGraphArea("rgb(255,255,255)",true);
+      // rchart.createLinearGradientPalette(0,0,0,200,"rgb(96, 96, 96)","rgb(16, 16, 16)");
+      rchart.setFixedScale(-2,9,3);
+      rchart.drawScale(["series1","series2","series4"],1,"rgb(150,150,150)",true,"center",2,true,1);
+      rchart.drawGrid(1,false,"rgba(230,230,230,50)");
+      rchart.drawStackedBarGraph();
+      rchart.drawLegend();
+
+      //      var rchart1 = new Rchart("example2",x);
+      //      rchart1.setGraphArea(50,30,585,200);
+      //      rchart1.drawFilledRoundedRectangle(7,7,693,223,5,"#f0f0f0");
+      //      rchart1.drawRoundedRectangle(5,5,695,225,5,"#e6e6e6");
+      //      rchart1.drawGraphArea("rgb(255,255,255)",true);
+      //      //  rchart1.createLinearGradientPalette(0,0,0,200,"rgb(96, 96, 96)","rgb(16, 16, 16)");
+      //      //      rchart1.setFixedScale(20,90,3);
+      //      rchart1.drawScale(["series1"],1,"rgb(150,150,150)",true,"center",1,true,1);
+      //      rchart1.drawGrid(1,false,"rgba(230,230,230,50)");
+      //      rchart1.drawBarGraph();
+      //      var rchart2 = new Rchart("example3",x);
+      //      rchart2.setGraphArea(50,30,585,200);
+      //      // rchart2.drawFilledRoundedRectangle(7,7,693,223,5,"#f0f0f0");
+      //      rchart2.drawRoundedRectangle(5,5,695,225,5,"#e6e6e6");
+      //      // rchart2.drawGraphArea("rgb(255,255,255)",true);
+      //      rchart2.createLinearGradientPalette(0,0,0,200,"rgb(96, 96, 96)","rgb(16, 16, 16)");
+      //      // rchart1.setFixedScale(20,90,3);
+      //      rchart2.drawScale(["series1"],1,"rgb(150,150,150)",true,"center",1,true,1);
+      //      rchart2.drawGrid(1,false,"rgba(230,230,230,50)");
+      //      rchart2.drawBarGraph();
+    });
+  </script>
+</head>
+<body>
+<canvas id="example1" width="700" height="230">dsd</canvas>
+<canvas id="example2" width="700" height="230">dsd</canvas>
+<canvas id="example3" width="700" height="230">dsd</canvas>
+</body>
+</html>
