@@ -1,19 +1,21 @@
 function Rchart(id, data)
 {
 
-
+   
     this.id                = id;
     this.canvas            = document.getElementById(id);
     this.context           = this.canvas.getContext ? this.canvas.getContext("2d") : null;
     this.data              = data;
-
+     
     this.initializeValue  = this.initializeValue();
-    this.charts = {'bar':'bar','line':'line'};
+    this.charts = {'bar':'bar','line':'line','pie':'pie'};
     this.gAreaX1 = 0;
     this.gAreaX2 = 0;
     this.gAreaY1 = 0;
     this.gAreaY2 = 0;
     //SCALE
+    this.gCenterX = 0;
+    this.gCentery = 0;
     this.vMin;
     this.vMax;
     this.vXMin;
@@ -30,7 +32,10 @@ function Rchart(id, data)
     this.text= new Text({});
     this.self=this;
     this._intID = 0;
-
+    
+    // The Following is Data for Pie Chart
+    this.startAngle = 270;
+    
     // this.drawGraph(this.data);
     // ADD RDATA/RCHART Default values or required parameter
 }
@@ -42,7 +47,7 @@ function swap_no(array_el)
     array_el[1] =temp;
     return array_el;
 }
-//set boundry of grapg
+//set boundry of graph
 Rchart.fn.setGraphArea = function(x1,y1,x2,y2)
 {
     this.gAreaX1 =x1;
@@ -317,24 +322,26 @@ Rchart.fn.setFixedScale = function(vMin,vMax,divisions,vXMin,vXMax,xDivisions)
 //align ="center"
 //draw_ticks=true,angle=0,decimals=1,with_margin=false,skip_labels=1,right_scale=false
 Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,skipLabel,rightScale,font,fontSize){
-    drawTicks=typeof(drawTicks) != 'undefined' ? drawTicks : true;
-    align=typeof(angle) != 'undefined' ? align : "left";
+    drawTicks = typeof(drawTicks) != 'undefined' ? drawTicks : true;
+    align  = typeof(angle) != 'undefined' ? align : "left";
     decimals=typeof(decimals) != 'undefined' ? decimals : 1;
     margin=typeof(margin) != 'undefined' ? margin : false;
     skipLabel=typeof(skipLabel) != 'undefined' ? skipLabel : 1;
     rightScale=typeof(rightScale) != 'undefined' ? rightScale : false;
     font=typeof(font) != 'undefined' ? font : "Arial";
     fontSize=typeof(fontSize) != 'undefined' ? fontSize : 8;
-    var scale =0;
-    var divisions =0;
+    var scale = 0;
+    var divisions = 0;
 
     this.context.beginPath();
+    
     this.drawLine(this.gAreaX1,this.gAreaY1,this.gAreaX1,this.gAreaY2,color);
+    
     this.drawLine(this.gAreaX1,this.gAreaY2,this.gAreaX2,this.gAreaY2,color);
     //Calculate Minimum And Maximum Value from Array of data
     //set default value of vertical min,and vertical maximum
 
-    if(this.vMin==null && this.vMax==null)
+    if(this.vMin == null && this.vMax == null)
     {
         //var defaultSeriesValue =this.findSeriesValues(data[0])[0];
         if((this.findSeriesValues(data[0]) != 'undefined') && (this.findSeriesValues(data[0])[0] != 'undefined'))
@@ -716,6 +723,90 @@ Rchart.fn.findSeriesValues= function(name,key)
     return values;
 };
 
+
+// PIE Chart Graph
+
+
+Rchart.fn.drawPieGraph = function() {
+   var pieSeries = this.data["graph"]["pie"]["values"]; 
+    
+   var pieSeriesValue = this.findSeriesValues(pieSeries);
+     
+   var pieSeriesColor = this.findSeriesValues(pieSeries,"color");
+   
+   // The Amount the degree the Pie Should be shifted from starting point
+   var pieOffset = this.findSeriesValues(pieSeries,"offset");
+   
+   var pieRotation = this.findSeriesValues(pieSeries,"rotation");
+   
+   var pieLabels  = this.findSeriesValues(pieSeries,"label");
+   
+   var pieLegend =  this.findSeriesValues(pieSeries,"legend");
+   
+   var pieRadius =  this.findSeriesValues(pieSeries,"radius");
+   
+   var pieOffset = typeof(pieOffset) == "undefined" ? 0 : pieOffset;
+   
+   var pieRotation = typeof(pieRotation) == "undefined" ? true : pieRotation;
+   
+   var pieLegend =   typeof(pieLegend) == "undefined" ? false : pieLegend;
+   
+   var pieRadius = typeof(pieRadius) == "undefined" ? this.setPieRadius : pieRadius;
+   
+   var total  =  this.pieTotal(pieSeriesValue);
+   
+   
+   this.setGraphArea(0,0,this.canvas.width,this.canvas.height);
+   this.drawGraphArea("rgb(255,255,255)",true);
+   this.findCenter(this.canvas.width,this.canvas.height)
+   this.startAngle +=  pieOffset;
+   var startAngle = this.startAngle
+   console.log(pieOffset);
+   console.log(pieRotation);
+   console.log(total); 
+   console.log(startAngle);  
+    for (var i=0; i < pieSeriesValue.length ; i++) {
+            this.context.beginPath();
+            this.context.moveTo(this.gCenterX,this.gCenterY);
+            this.context.fillStyle = pieSeriesColor[i] ;
+            if (i != pieSeriesValue.length-1)
+              var endAngle = startAngle + (pieSeriesValue[i]/total)*360;  
+            else
+              var endAngle = this.startAngle;
+            this.context.arc(this.gCenterX,this.gCenterY,pieRadius,(Math.PI/180)*startAngle,(Math.PI/180)*endAngle,pieRotation)
+            startAngle = endAngle; 
+            this.context.fill();
+         } 
+          
+   
+   
+}
+
+Rchart.fn.pieTotal = function(seriesValue) {
+  var total = 0;
+  var i = 0 ;
+   while(i < seriesValue.length) { 
+      if (typeof(seriesValue[i]) == "number")
+        total += seriesValue[i];
+      else {
+        console.log("Error in Pie Data");  
+        break
+      }  
+     i++;
+    }
+   return total; 
+}
+
+Rchart.fn.definePieRadius = function() {
+  min(this.width,this.height) - 5; 
+}
+
+Rchart.fn.findCenter = function(width,height) {
+  this.gCenterX = width/2;
+  this.gCenterY = height/2;
+}
+
+// Bar Graph Code
 Rchart.fn.drawBarGraph = function(){
 
 
@@ -836,14 +927,16 @@ Rchart.fn.drawGraph = function()
 
     if (typeof(this.data["graph"] == "object"))
     {
+       
         //Traversing Through present chart
         for (var chart in this.charts)
-        {
-
-            if (typeof(this.data["graph"][chart] != "undefined"))
+        {   
+                       
+            if (typeof(this.data["graph"][chart]) != "undefined")
             {
                 //IF Graph Found draw graph
                 //NEED SOME OPTIMIZATION USING KEY VALUE
+                
                 if(chart=="bar")
                 {
                     var instant=this;
@@ -852,6 +945,12 @@ Rchart.fn.drawGraph = function()
                     // setInterval(this.drawBarGraph(), 10);
 
                     this.drawBarGraph()
+                }
+                if(chart=="pie")
+                {
+                 
+                  this.drawPieGraph();                   
+                    
                 }
             }
 
@@ -948,6 +1047,14 @@ Object.prototype.merge = function( source) {
     return this;
 };
 
+min = function(n1,n2) {
+  if (n1 > n2)
+   return n2;
+  if (n1 < n2)
+   return n1;
+  if (n2 == n1)
+   return n2; 
+}
 function roundOf(num, dec) { // Arguments: number to round, number of decimal places
     return Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
 }
