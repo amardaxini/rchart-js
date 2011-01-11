@@ -1,12 +1,12 @@
 function Rchart(id, data)
 {
 
-   
+
     this.id                = id;
     this.canvas            = document.getElementById(id);
     this.context           = this.canvas.getContext ? this.canvas.getContext("2d") : null;
     this.data              = data;
-     
+
     this.initializeValue  = this.initializeValue();
     this.charts = {'bar':'bar','line':'line','pie':'pie'};
     this.gAreaX1 = 0;
@@ -32,10 +32,10 @@ function Rchart(id, data)
     this.text= new Text({});
     this.self=this;
     this._intID = 0;
-    
+
     // The Following is Data for Pie Chart
     this.startAngle = 270;
-    
+
     // this.drawGraph(this.data);
     // ADD RDATA/RCHART Default values or required parameter
 }
@@ -188,6 +188,7 @@ Rchart.fn.drawFilledRoundedRectangle = function(x1, y1, x2, y2, radius,color)
     this.context.fillStyle = color;
     var  width = x2-x1;
     var height = y2-y1;
+    // console.log(x1);
     this.roundedRectangle(x1,y1,width,height,radius);
     this.context.fill();
 };
@@ -334,9 +335,9 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
     var divisions = 0;
 
     this.context.beginPath();
-    
+
     this.drawLine(this.gAreaX1,this.gAreaY1,this.gAreaX1,this.gAreaY2,color);
-    
+
     this.drawLine(this.gAreaX1,this.gAreaY2,this.gAreaX2,this.gAreaY2,color);
     //Calculate Minimum And Maximum Value from Array of data
     //set default value of vertical min,and vertical maximum
@@ -595,7 +596,7 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
 
         textOptions= textOptions.merge(yAxis["value"]);
 
-        console.log(xMin-textHeight);
+        // console.log(xMin-textHeight);
         if (rightScale)
         {
 
@@ -728,84 +729,170 @@ Rchart.fn.findSeriesValues= function(name,key)
 
 
 Rchart.fn.drawPieGraph = function() {
-   var pieSeries = this.data["graph"]["pie"]["values"]; 
-    
-   var pieSeriesValue = this.findSeriesValues(pieSeries);
-     
-   var pieSeriesColor = this.findSeriesValues(pieSeries,"color");
-   
-   // The Amount the degree the Pie Should be shifted from starting point
-   var pieOffset = this.findSeriesValues(pieSeries,"offset");
-   
-   var pieRotation = this.findSeriesValues(pieSeries,"rotation");
-   
-   var pieLabels  = this.findSeriesValues(pieSeries,"label");
-   
-   var pieLegend =  this.findSeriesValues(pieSeries,"legend");
-   
-   var pieRadius =  this.findSeriesValues(pieSeries,"radius");
-   
-   var pieOffset = typeof(pieOffset) == "undefined" ? 0 : pieOffset;
-   
-   var pieRotation = typeof(pieRotation) == "undefined" ? true : pieRotation;
-   
-   var pieLegend =   typeof(pieLegend) == "undefined" ? false : pieLegend;
-   
-   var pieRadius = typeof(pieRadius) == "undefined" ? this.setPieRadius : pieRadius;
-   
-   var total  =  this.pieTotal(pieSeriesValue);
-   
-   
-   this.setGraphArea(0,0,this.canvas.width,this.canvas.height);
-   this.drawGraphArea("rgb(255,255,255)",true);
-   this.findCenter(this.canvas.width,this.canvas.height)
-   this.startAngle +=  pieOffset;
-   var startAngle = this.startAngle
-   console.log(pieOffset);
-   console.log(pieRotation);
-   console.log(total); 
-   console.log(startAngle);  
+    var pieSeries = this.data["graph"]["pie"]["values"];
+
+    var pieSeriesValue = this.findSeriesValues(pieSeries);
+
+    var pieSeriesColor = this.findSeriesValues(pieSeries,"color");
+
+    // The Amount the degree the Pie Should be shifted from starting point
+    var pieOffset = this.findSeriesValues(pieSeries,"offset");
+
+    var pieRotation = this.findSeriesValues(pieSeries,"rotation");
+
+    var pieLabels  = this.findSeriesValues(pieSeries,"label");
+
+    var pieLegend =  this.findSeriesValues(pieSeries,"legend");
+
+    var pieRadius =  this.findSeriesValues(pieSeries,"radius");
+
+    var pieOffset = typeof(pieOffset) == "undefined" ? 0 : pieOffset;
+
+    var pieRotation = typeof(pieRotation) == "undefined" ? true : pieRotation;
+
+    var pieLegend =   typeof(pieLegend) == "undefined" ? false : pieLegend;
+
+    var pieRadius = typeof(pieRadius) == "undefined" ? this.setPieRadius : pieRadius;
+
+    var total  =  this.pieTotal(pieSeriesValue);
+
+
+    this.setGraphArea(0,0,this.canvas.width,this.canvas.height);
+    this.drawGraphArea("rgb(255,255,255)",true);
+    this.findCenter(this.canvas.width,this.canvas.height)
+    this.startAngle +=  pieOffset;
+    var startAngle = this.startAngle
+    console.log(pieOffset);
+    console.log(pieRotation);
+    console.log(total);
+    console.log(startAngle);
     for (var i=0; i < pieSeriesValue.length ; i++) {
-            this.context.beginPath();
-            this.context.moveTo(this.gCenterX,this.gCenterY);
-            this.context.fillStyle = pieSeriesColor[i] ;
-            if (i != pieSeriesValue.length-1)
-              var endAngle = startAngle + (pieSeriesValue[i]/total)*360;  
-            else
-              var endAngle = this.startAngle;
-            this.context.arc(this.gCenterX,this.gCenterY,pieRadius,(Math.PI/180)*startAngle,(Math.PI/180)*endAngle,pieRotation)
-            startAngle = endAngle; 
-            this.context.fill();
-         } 
-          
-   
-   
-}
+        this.context.beginPath();
+        this.context.moveTo(this.gCenterX,this.gCenterY);
+        this.context.fillStyle = pieSeriesColor[i] ;
+        if (i != pieSeriesValue.length-1)
+            var endAngle = startAngle + (pieSeriesValue[i]/total)*360;
+        else
+            var endAngle = this.startAngle;
+        this.context.arc(this.gCenterX,this.gCenterY,pieRadius,(Math.PI/180)*startAngle,(Math.PI/180)*endAngle,pieRotation)
+        startAngle = endAngle;
+        this.context.fill();
+    }
+
+
+
+};
 
 Rchart.fn.pieTotal = function(seriesValue) {
-  var total = 0;
-  var i = 0 ;
-   while(i < seriesValue.length) { 
-      if (typeof(seriesValue[i]) == "number")
-        total += seriesValue[i];
-      else {
-        console.log("Error in Pie Data");  
-        break
-      }  
-     i++;
+    var total = 0;
+    var i = 0 ;
+    while(i < seriesValue.length) {
+        if (typeof(seriesValue[i]) == "number")
+            total += seriesValue[i];
+        else {
+            console.log("Error in Pie Data");
+            break
+        }
+        i++;
     }
-   return total; 
-}
+    return total;
+};
 
 Rchart.fn.definePieRadius = function() {
-  min(this.width,this.height) - 5; 
-}
+    min([this.width,this.height]) - 5;
+};
 
 Rchart.fn.findCenter = function(width,height) {
-  this.gCenterX = width/2;
-  this.gCenterY = height/2;
-}
+    this.gCenterX = width/2;
+    this.gCenterY = height/2;
+};
+Rchart.fn.drawLegend =function(){
+    var legend =this.data["legend"];
+    if(typeof(legend)!="undefined")
+    {
+        var xPos = legend["xPos"];
+        var yPos = legend["yPos"];
+        var series = legend["series"];
+        var textOptions = typeof(legend["textOptions"]) !="undefined" ? legend["textOptions"] : {};
+        var legendAlign = typeof(legend["legendAlign"]) !="undefined" ? legend["legendAlign"] : "vertical";
+        var textHeight = typeof(textOptions["fontSize"]) !="undefined" ? textOptions["fontSize"] : 10;
+        var border = typeof(textOptions["border"]) !="undefined" ? textOptions["border"] : true;
+        var backgroundColor=typeof(legend["backgroundColor"]) !="undefined" ? legend["backgroundColor"] : "#ffffff";
+        var borderColor = typeof(legend["borderColor"]) !="undefined" ? legend["borderColor"] : "#000000";
+        var maxWidth = 0;
+        var maxHeight = textHeight;
 
+
+        for(var i=0;i<series.length;i++)
+        {
+            var name = textOptions.merge({"x":xPos,"y":yPos,"text":series[0]});
+            var textWidth = this.textWidth(name);
+            if(legendAlign =="vertical")
+            {
+
+                if(textWidth > maxWidth)
+                {
+                    maxWidth = textWidth;
+                }
+                maxHeight = maxHeight + textHeight + 4
+            }
+            else
+            {
+
+                maxWidth = textWidth+maxWidth;
+                maxHeight =  textHeight+10;
+            }
+
+        }
+
+
+        maxHeight = maxHeight - 5;
+        maxWidth  = maxWidth + 38;
+
+
+
+        if(border)
+        {
+            if(legendAlign =="vertical")
+            {
+                this.drawFilledRoundedRectangle(xPos+1,yPos+1,xPos+maxWidth,yPos+maxHeight+1,5,borderColor);
+                this.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
+            }
+            else
+            {
+                this.drawFilledRoundedRectangle(xPos+1,yPos+2,xPos+maxWidth+5,yPos+maxHeight+5,5,borderColor);
+               //his.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
+
+            }
+        }
+        var yOffset =  textHeight;
+        var xOffset = 4;
+
+        for(i=0;i<series.length;i++)
+        {
+            var legendColor = typeof(this.findSeriesValues(series[i],"color"))!="undefined" ? this.findSeriesValues(series[i],"color") : "#000000";
+
+            if(legendAlign =="vertical")
+            {
+                this.drawRoundedRectangle((xPos+10),yPos+yOffset-4,xPos+18,yPos+yOffset+4,2,legendColor);
+                name = textOptions.merge({"x":xPos+22,"y":yPos+yOffset+4,"text":series[i]});
+                this.drawText(name);
+                yOffset = yOffset + textHeight + 4;
+            }
+            else
+            {
+                var nameWidth =  this.textWidth(textOptions.merge({"x":0,"y":0,"text":series[i]}));
+                this.drawFilledRoundedRectangle(xPos+xOffset,yPos+(textHeight/2)+1,xPos+xOffset+8,yPos+(textHeight/2)+10,2,legendColor);
+                name = textOptions.merge({"x":xPos+xOffset+10,"y":yPos+textHeight+5,"text":series[i]});
+                this.drawText(name);
+                xOffset = xOffset + nameWidth + 12;
+
+            }
+
+        }
+    }
+
+};
 // Bar Graph Code
 Rchart.fn.drawBarGraph = function(){
 
@@ -884,6 +971,7 @@ Rchart.fn.drawBarGraph = function(){
         }
     }
 };
+
 Rchart.fn.drawAnimatedRectangle = function(x1,y1,x2,y2,color){
     var instant =this;
     this._intID = setTimeout(function() { instant.drawFilledRectangle(x1,y1+1,x2,y2,color); }, 1000);
@@ -927,16 +1015,16 @@ Rchart.fn.drawGraph = function()
 
     if (typeof(this.data["graph"] == "object"))
     {
-       
+
         //Traversing Through present chart
         for (var chart in this.charts)
-        {   
-                       
+        {
+
             if (typeof(this.data["graph"][chart]) != "undefined")
             {
                 //IF Graph Found draw graph
                 //NEED SOME OPTIMIZATION USING KEY VALUE
-                
+
                 if(chart=="bar")
                 {
                     var instant=this;
@@ -948,9 +1036,9 @@ Rchart.fn.drawGraph = function()
                 }
                 if(chart=="pie")
                 {
-                 
-                  this.drawPieGraph();                   
-                    
+
+                    this.drawPieGraph();
+
                 }
             }
 
@@ -982,7 +1070,7 @@ function Text(options)
     this.y =   typeof(options.y) != 'undefined' ? options.y : 0;
     this.font =   typeof(options.font) != 'undefined' ? options.font : "Arial";
     this.fontSize = typeof(options.fontSize) != 'undefined' ? options.fontSize : 10;
-    this.align = typeof(options.align) != 'undefined' ? options.align : "center";
+    this.align = typeof(options.align) != 'undefined' ? options.align : "left";
     this.stroke =   typeof(options.stroke) != 'undefined' ? options.stroke : false;
     this.lineWidth =   typeof(options.lineWidth) != 'undefined' ? options.lineWidth : 1;
     this.strokeColor =   typeof(options.strokeColor) != 'undefined' ? options.strokeColor : "#000000";
@@ -1041,19 +1129,19 @@ Array.prototype.min = function() {
     return min;
 };
 //Hash Merging //NEED TO BE MODIFIED
-Object.prototype.merge = function( source) {
+Object.prototype.merge = function(source) {
     for (var property in source)
         this[property] = source[property];
     return this;
 };
 
 min = function(n1,n2) {
-  if (n1 > n2)
-   return n2;
-  if (n1 < n2)
-   return n1;
-  if (n2 == n1)
-   return n2; 
+    if (n1 > n2)
+        return n2;
+    if (n1 < n2)
+        return n1;
+    if (n2 == n1)
+        return n2;
 }
 function roundOf(num, dec) { // Arguments: number to round, number of decimal places
     return Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
