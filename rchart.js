@@ -861,7 +861,7 @@ Rchart.fn.drawLegend =function(){
             else
             {
                 this.drawFilledRoundedRectangle(xPos+1,yPos+2,xPos+maxWidth+5,yPos+maxHeight+5,5,borderColor);
-               //his.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
+               this.drawFilledRoundedRectangle(xPos,yPos,xPos+maxWidth,yPos+maxHeight,5,backgroundColor);
 
             }
         }
@@ -874,7 +874,7 @@ Rchart.fn.drawLegend =function(){
 
             if(legendAlign =="vertical")
             {
-                this.drawRoundedRectangle((xPos+10),yPos+yOffset-4,xPos+18,yPos+yOffset+4,2,legendColor);
+                this.drawFilledRoundedRectangle((xPos+10),yPos+yOffset-4,xPos+18,yPos+yOffset+4,2,legendColor);
                 name = textOptions.merge({"x":xPos+22,"y":yPos+yOffset+4,"text":series[i]});
                 this.drawText(name);
                 yOffset = yOffset + textHeight + 4;
