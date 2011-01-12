@@ -265,30 +265,30 @@ Rchart.fn.drawGrid = function(lineWidth,color,dotted,vertical)
 
     dotted = typeof(dotted) != 'undefined' ? dotted : false;
     vertical = typeof(vertical) != 'undefined' ? vertical : true;
-//    if (mosaic)
-//    {
-//        //var width  = this.gAreaX2-this.gAreaX1;
-//        //this.context.beginPath();
-//       // this.drawFilledRectangle(0,0,this.gAreaX2,this.gAreaY2,color);
-//        var yPos  = this.gAreaY2;//-this.gAreaY1;
-//        var lastY = yPos;
-//        i=0;
-//
-//        while(i<=this.divisionCount)
-//        {
-//            lastY=  yPos;
-//            yPos  =  yPos - this.divisionHeight;
-//            if(yPos <= 0 )
-//                yPos = 1;
-//            if ( i % 2 == 0 )
-//            {
-//                this.drawFilledRectangle(this.gAreaX1+1,yPos,this.gAreaX2,lastY,"rgb(250,250,250)");
-//            }
-//            i = i+1;
-//        }
-//
-//
-//    }
+    //    if (mosaic)
+    //    {
+    //        //var width  = this.gAreaX2-this.gAreaX1;
+    //        //this.context.beginPath();
+    //       // this.drawFilledRectangle(0,0,this.gAreaX2,this.gAreaY2,color);
+    //        var yPos  = this.gAreaY2;//-this.gAreaY1;
+    //        var lastY = yPos;
+    //        i=0;
+    //
+    //        while(i<=this.divisionCount)
+    //        {
+    //            lastY=  yPos;
+    //            yPos  =  yPos - this.divisionHeight;
+    //            if(yPos <= 0 )
+    //                yPos = 1;
+    //            if ( i % 2 == 0 )
+    //            {
+    //                this.drawFilledRectangle(this.gAreaX1+1,yPos,this.gAreaX2,lastY,"rgb(250,250,250)");
+    //            }
+    //            i = i+1;
+    //        }
+    //
+    //
+    //    }
     //Horizontal lines
     yPos = this.gAreaY2 - this.divisionHeight;
     var i=1;
@@ -375,7 +375,7 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
     fontSize=typeof(fontSize) != 'undefined' ? fontSize : 8;
     var scale = 0;
     var divisions = 0;
-
+    var dataLength = 0;
     this.context.beginPath();
 
     this.drawLine(this.gAreaX1,this.gAreaY1,this.gAreaX1,this.gAreaY2,color);
@@ -412,7 +412,8 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
                 if((this.findSeriesValues(data[i]) != 'undefined'))
                 {
                     var values = this.findSeriesValues(data[i]);
-
+                    if(dataLength < values.length)
+                        dataLength =  values.length;
                     if(this.vMax < values.max())
                         this.vMax = values.max();
                     if(this.vMin > values.min())
@@ -427,21 +428,25 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
             if (mode == 4 )
                 this.vMin = 0;
             var seriesData= [];
-            var length;
-            for(var i=0;i<data.length;i++)
+            var length=0;
+            for(i=0;i<data.length;i++)
             {
                 //add all data to one array
                 //[1,2,3],[4,5,0] max min of summation of each index
 
                 if((this.findSeriesValues(data[i]) != 'undefined'))
                 {
-                    length =this.findSeriesValues(data[i]).length;
-                    seriesData.push(this.findSeriesValues(data[i]));
+                    if(length<this.findSeriesValues(data[i]).length)
+                    {
+                        length =this.findSeriesValues(data[i]).length;
+                        dataLength = length;
+                    }
+                    seriesData[i] =this.findSeriesValues(data[i]);
 
                 }
             }
 
-            for(var i=0;i<length;i++)
+            for(i=0;i<length;i++)
             {
                 var sum=0;
                 for(var j=0;j<seriesData.length;j++)
@@ -527,6 +532,7 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
         divisions = this.divisions
     }
 
+
     this.divisionCount =divisions;
     //Now Find Out Data Range
     var dataRange = this.vMax - this.vMin;
@@ -536,13 +542,13 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
     this.divisionRatio  = parseFloat(this.gAreaY2 - this.gAreaY1 ) /dataRange;
     this.gAreaXOffset  = 0;
 
-    if (this.findSeriesValues(data[0]).length > 1 )
+    if (dataLength > 1 )
     {
         if (!margin)
-            this.divisionWidth = parseFloat(this.gAreaX2 - this.gAreaX1 )/(this.findSeriesValues(data[0]).length-1);
+            this.divisionWidth = parseFloat(this.gAreaX2 - this.gAreaX1 )/(dataLength-1);
         else
         {
-            this.divisionWidth = parseFloat(this.gAreaX2 - this.gAreaX1 )/(this.findSeriesValues(data[0]).length);
+            this.divisionWidth = parseFloat(this.gAreaX2 - this.gAreaX1 )/(dataLength);
             this.gAreaXOffset  = parseFloat(this.divisionWidth) / 2;
         }
     }
@@ -551,7 +557,8 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
         this.divisionWidth =parseFloat(this.gAreaX2 - this.gAreaX1);
         this.gAreaXOffset  =parseFloat(this.divisionWidth)/2;
     }
-    this.dataCount = this.findSeriesValues(data[0]).length;
+    this.dataCount = dataLength;
+
     if (!drawTicks)
         return;
     var yPos = this.gAreaY2;
@@ -616,15 +623,8 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
         if ( id % skipLabel == 0 )
             this.drawLine(xPos,this.gAreaY2,xPos,this.gAreaY2+5,color);
         value =xLabelSeries[i];
-        //        if (angle == 0 )
-        //        {
         yPos= this.gAreaY2+18;
         this.drawText({"x":Math.floor(xPos)-(width/2),"y":yPos,"text":value,"fontSize":fontSize,"font":font,"color":color,"align":align});
-        //        }
-        //        else
-        //            yPos= this.gAreaY2+10+height;
-        //        if (yMax==0 ||(yMax!=0 && yMax < yPos))
-        //     yMax = yPos;
         xPos = xPos + this.divisionWidth;
         id = id+1
     }
@@ -975,12 +975,13 @@ Rchart.fn.drawZeroLine = function(value,color,showLabel,showOnRight,tickWidth,te
 Rchart.fn.drawBarGraph = function(){
 
 
+
     var bar = this.data["graph"]["bar"];
     var noSeries = bar["values"];
     var width = this.graphWidth();
     var height = this.graphHeight();
-   
-    
+
+
     //set bar and gutter width
     var drawBorder= typeof(bar["border"]) != 'undefined';
     if(drawBorder){
@@ -988,61 +989,41 @@ Rchart.fn.drawBarGraph = function(){
         var borderWidth = typeof(bar["borderWidth"])!= "undefined" ? bar["borderWidth"] : 1;
     }
     var gutterWidth = typeof(bar["gutterWidth"]) != 'undefined' ? bar["gutterWidth"] :10;
+    var seriesWidth  = this.divisionWidth /(noSeries.length+1);
+    var seriesXOffset = (this.divisionWidth  / 2 - seriesWidth / 2);
+    var yZero  = this.gAreaY2 - ((0-this.vMin) * this.divisionRatio);
 
-    //Find Out Maximum values
-    var maxValues =0;
-    for(var seriesL=0;seriesL<noSeries.length;seriesL++)
-    {
-        if(maxValues <this.findSeriesValues(noSeries[seriesL]).length)
-            maxValues = this.findSeriesValues(noSeries[seriesL]);
-    }
-    var unitWidth = Math.round(width/maxValues.length);
-    var cBarWidth = unitWidth-gutterWidth*2;
-    var barWidth = cBarWidth/noSeries.length;
-    var yZero  = Math.floor(this.gAreaY2 - ((0-this.vMin) * this.divisionRatio));
-    console.log(Math.floor(yZero));
     if ( yZero> this.gAreaY2 )
         yZero = this.gAreaY2 ;
 
-    for(seriesL=0;seriesL<noSeries.length;seriesL++)
+    for(var seriesL=0;seriesL<noSeries.length;seriesL++)
     {
         var values = this.findSeriesValues(noSeries[seriesL]);
         var barColor = this.findSeriesValues(noSeries[seriesL],"color");
-
+        var xPos = this.gAreaX1 + this.gAreaXOffset - seriesXOffset + seriesWidth * seriesL;
         if(typeof(values) == "object")
         {
             var noOfValues = values.length;
 
             if(typeof(this.gAreaX1 != "undefined") && typeof(this.gAreaX2 != "undefined") && typeof(this.gAreaY1 != "undefined") && typeof(this.gAreaY2 != "undefined"))
             {
-                // NECESSARY STATEMENT IF NOT WRITTEN WHOLE BORDER  COLOR OF CHART IS CHANGED
                 this.context.beginPath();
                 //Draw Actual Graph
                 for(var i=0;i<values.length;i++)
                 {
                     //Calculate X1 Position
-                    var x1= this.gAreaX1+(unitWidth*(i))+(gutterWidth)+(barWidth*seriesL);
-                    var y1 =this.gAreaY2-((values[i]-this.vMin)*this.divisionRatio);
-                    if(y1==this.gAreaY2)
-                        y1 = this.gAreaY2;
-                    var x2= x1+barWidth;
-                    var y2 =y1;
-//                    if(y1 == yZero)
-//                        y2 = yZero;
-//                    if(y2>yZero)
-//                        y2= -2.2;
+                    var yPos =this.gAreaY2-((values[i]-this.vMin)*this.divisionRatio);
                     this.context.beginPath();
-
-                    this.drawFilledRectangle(x1+1,yZero,x2-1,y1,barColor);
-                    
+                    this.drawFilledRectangle(xPos+1,yZero,xPos+seriesWidth-1,yPos,barColor);
                     if(drawBorder)
                     {
-                       
                         this.drawLine(x1,y1,x1,y2+2.2,borderColor,borderWidth);
                         this.drawLine(x1,y1,x2,y1,borderColor,borderWidth);
                         this.drawLine(x2,y1,x2,y2+2.2,borderColor,borderWidth);
                     }
+                    xPos = xPos + this.divisionWidth;
                 }
+
             }
 
         }
@@ -1051,24 +1032,56 @@ Rchart.fn.drawBarGraph = function(){
 Rchart.fn.drawStackedBarGraph = function()
 {
     var stackedBar = this.data["graph"]["stackedBar"];
-
     var noSeries = stackedBar["values"];
-
     var seriesWidth  = this.divisionWidth * 0.8;
     var seriesOfValues =[];
+    var maxLength = 0;
+    var yZero  = this.gAreaY2 - ((0-this.vMin) * this.divisionRatio);
+    if ( yZero> this.gAreaY2 )
+        yZero = this.gAreaY2 ;
     for(var i=0;i<noSeries.length;i++)
     {
         seriesOfValues[i] = this.findSeriesValues(noSeries[i]);
+        if(maxLength <seriesOfValues[i].length)
+        {
+            maxLength = seriesOfValues[i].length;
+        }
     }
-    for(j=0;j<noSeries.length;j++)
+    var xPos = this.gAreaX1 + this.gAreaXOffset - seriesWidth/2;
+    for(var j=0;j<maxLength;j++)
     {
+        var lastValue=0;
+
+
         for(i=0;i<noSeries.length;i++)
         {
-            seriesOfValues[i]
-            this.context.beginPath();
-            this.drawFilledRectangle(x1+1,y1,x2-1,y2,barColor);
+            var barColor = this.findSeriesValues(noSeries[i],"color");
+            var value =seriesOfValues[i][j];
+            if(!isNaN(value))
+            {
+
+                if(i!=0)
+                {
+                    var   yPos    = this.gAreaY2 - (((value+lastValue)-this.vMin) * this.divisionRatio);
+                    var  yBottom = this.gAreaY2 - ((lastValue-this.vMin) * this.divisionRatio);
+                    var  lastValue= lastValue+ value;
+                }
+                else
+                {
+                    var   yPos    = this.gAreaY2 - ((value-this.vMin) *  this.divisionRatio);
+                    var  yBottom = yZero;
+                    var  lastValue = value;
+                }
+                this.context.beginPath();
+                console.log(yPos);
+                this.drawFilledRectangle(xPos+1,yBottom,xPos+seriesWidth-1,yPos,barColor);
+            }
 
         }
+
+        xPos = xPos + this.divisionWidth;
+
+
     }
 };
 Rchart.fn.drawAnimatedRectangle = function(x1,y1,x2,y2,color){
