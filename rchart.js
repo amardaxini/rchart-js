@@ -6,7 +6,6 @@ function Rchart(id, data)
     this.canvas            = document.getElementById(id);
     this.context           = this.canvas.getContext ? this.canvas.getContext("2d") : null;
     this.data              = data;
-
     this.initializeValue  = this.initializeValue();
     this.charts = {'bar':'bar','line':'line','pie':'pie'};
     this.gAreaX1 = 0;
@@ -84,7 +83,22 @@ Rchart.fn.drawLine = function(x1, y1, x2, y2, color,width)
 
 
 };
+Rchart.fn.drawDottedLine = function(x1,y1,x2,y2,dotSize,color,width)
+{
+    this.context.dashedLineTo(x1,y1,x2,y2,dotSize);
+    if(typeof(color) != 'undefined')
+    {
+        //this.context.strokeStyle = color;
+        this.context.strokeStyle = color;
+        this.context.strokeStyle = ''
+    }
+    if(typeof(width) != 'undefined')
+    {
+        this.context.lineWidth=width;
+    }
+    this.context.stroke();
 
+};
 // Drawing rectangle starting coordinate (x1,y1) and ending coordinate (x2,y2)
 // rectangel can be drawn 2 ways by actual canvas method rect or
 // by drawing line with changing coordinate
@@ -192,6 +206,7 @@ Rchart.fn.drawFilledRoundedRectangle = function(x1, y1, x2, y2, radius,color)
     this.roundedRectangle(x1,y1,width,height,radius);
     this.context.fill();
 };
+
 Rchart.fn.drawGraphArea = function(color,stripe)
 {
     stripe = typeof(stripe) != 'undefined' ? stripe : false;
@@ -205,7 +220,8 @@ Rchart.fn.drawGraphArea = function(color,stripe)
     var b1 = b-40;
     decStr = "rgb("+r1+","+g1+","+b1+")";
     var colorHex = new RGBColor(decStr).getHexVals();
-
+    this.drawFilledRectangle(this.gAreaX1,this.gAreaY1,this.gAreaX2,this.gAreaY2,color,false);
+    this.drawRectangle(this.gAreaX1,this.gAreaY1,this.gAreaX2,this.gAreaY2,colorHex);
     if(stripe)
     {
         var	r2 = r-15;
@@ -219,7 +235,7 @@ Rchart.fn.drawGraphArea = function(color,stripe)
         var lineHexColor = new RGBColor(lineDecColor).getHexVals(lineDecColor);
         var skewWidth = this.gAreaY2-this.gAreaY1-1;
         var i =this.gAreaX1-skewWidth;
-
+        console.log(i);
         while(parseFloat(i)<=parseFloat(this.gAreaX2))
         {
             var x1 = i;
@@ -236,65 +252,91 @@ Rchart.fn.drawGraphArea = function(color,stripe)
                 y2 = this.gAreaY1 + x2 - this.gAreaX2 +1;
                 x2 = this.gAreaX2 - 1;
             }
+            //      this.context.beginPath();
             this.drawLine(x1,y1,x2,y2+1,lineHexColor);
             i = i+4;
         }
     }
 
-    this.drawFilledRectangle(this.gAreaX1,this.gAreaY1,this.gAreaX2,this.gAreaY2,color,false);
-    this.drawRectangle(this.gAreaX1,this.gAreaY1,this.gAreaX2,this.gAreaY2,colorHex);
+
 };
-Rchart.fn.drawGrid = function(lineWidth,mosaic,color)
+Rchart.fn.drawGrid = function(lineWidth,color,dotted,vertical)
 {
 
-
-    if (mosaic)
-    {
-        var width  = this.gAreaX2-this.gAreaX1;
-        var height  = this.gAreaY2-this.gAreaY1;
-        // this.drawFilledRectangle(0,0,this.gAreaX2,this.gAreaY2,color);
-        var yPos  =height;
-        var lastY = yPos;
-        while(i<=this.divisionCount)
-        {
-            lastY=  yPos;
-            yPos  =  yPos - this.divisionHeight;
-            if(yPos <= 0 )
-                yPos = 1;
-            if ( i % 2 == 0 )
-                this.drawFilledRectangle(1,yPos,width-1,lastY,"rgb(250,250,250)");
-            i = i+1;
-        }
-
-
-    }
+    dotted = typeof(dotted) != 'undefined' ? dotted : false;
+    vertical = typeof(vertical) != 'undefined' ? vertical : true;
+//    if (mosaic)
+//    {
+//        //var width  = this.gAreaX2-this.gAreaX1;
+//        //this.context.beginPath();
+//       // this.drawFilledRectangle(0,0,this.gAreaX2,this.gAreaY2,color);
+//        var yPos  = this.gAreaY2;//-this.gAreaY1;
+//        var lastY = yPos;
+//        i=0;
+//
+//        while(i<=this.divisionCount)
+//        {
+//            lastY=  yPos;
+//            yPos  =  yPos - this.divisionHeight;
+//            if(yPos <= 0 )
+//                yPos = 1;
+//            if ( i % 2 == 0 )
+//            {
+//                this.drawFilledRectangle(this.gAreaX1+1,yPos,this.gAreaX2,lastY,"rgb(250,250,250)");
+//            }
+//            i = i+1;
+//        }
+//
+//
+//    }
     //Horizontal lines
     yPos = this.gAreaY2 - this.divisionHeight;
     var i=1;
-    this.context.beginPath();
+
 
     while(i<=this.divisionCount)
     {
 
         if ( Math.floor(yPos) > this.gAreaY1 && Math.floor(yPos) < this.gAreaY2 )
         {
-
-            this.drawLine(this.gAreaX1,yPos,this.gAreaX2,yPos,color,1);
-            //	self.draw_dotted_line(@g_area_x1,yPos,@g_area_x2,yPos,line_width,r,g,b) if ( yPos > gAreaY1 && yPos < gAreaY2 )
+            this.context.beginPath();
+            if(dotted)
+                this.drawDottedLine(this.gAreaX1,yPos,this.gAreaX2,yPos,4,color,1);
+            else
+                this.drawLine(this.gAreaX1,yPos,this.gAreaX2,yPos,color,1);
         }
         yPos = yPos - this.divisionHeight;
         i = i+1;
     }
     // Vertical lines
-    //		if (this.gAreax_offset == 0 )
-    //			x_pos = this.gAreax1 + (this.division_width) +this.gAreax_offset
-    //			col_count = (@data_count.to_f-2).floor
-    //		else
-    //
-    //			x_pos = this.gAreax1 +this.gAreax_offset
-    //			col_count = ( (this.gAreax2 - this.gAreax1) / this.division_width )
-    //		end
-    //		i= 1
+    if(vertical)
+    {
+        if (this.gAreaXOffset == 0 )
+        {
+            var xPos = this.gAreaX1 + (this.divisionWidth) +this.gAreaXOffset;
+            var colCount = Math.floor(parseFloat(this.dataCount)-2);
+        }
+        else
+        {
+            var xPos = this.gAreaX1 +this.gAreaXOffset;
+            var colCount = ( (this.gAreaX2 - this.gAreaX1) / this.divisionWidth );
+        }
+        i= 1;
+        while (i<=colCount)
+        {
+            if ( xPos > this.gAreaX1 && xPos < this.gAreaX2 )
+            {
+                this.context.beginPath();
+                if(dotted)
+                    this.drawDottedLine(Math.floor(xPos),this.gAreaY1,Math.floor(xPos),this.gAreaY2,4,color,lineWidth);
+                else
+                    this.drawLine(Math.floor(xPos),this.gAreaY1,Math.floor(xPos),this.gAreaY2,color,lineWidth);
+            }
+            xPos = xPos + this.divisionWidth;
+
+            i= i+1
+        }
+    }
 };
 Rchart.fn.setFixedScale = function(vMin,vMax,divisions,vXMin,vXMax,xDivisions)
 {
@@ -572,7 +614,7 @@ Rchart.fn.drawScale = function(data,mode,color,drawTicks,align,decimals,margin,s
     for(var i=0;i<xLabelSeries.length;i++)
     {
         if ( id % skipLabel == 0 )
-            this.drawLine(Math.floor(xPos),this.gAreaY2,Math.floor(xPos),this.gAreaY2+5,color);
+            this.drawLine(xPos,this.gAreaY2,xPos,this.gAreaY2+5,color);
         value =xLabelSeries[i];
         //        if (angle == 0 )
         //        {
@@ -844,12 +886,8 @@ Rchart.fn.drawLegend =function(){
             }
 
         }
-
-
         maxHeight = maxHeight - 5;
         maxWidth  = maxWidth + 38;
-
-
 
         if(border)
         {
@@ -875,7 +913,7 @@ Rchart.fn.drawLegend =function(){
             if(legendAlign =="vertical")
             {
                 this.drawFilledRoundedRectangle((xPos+10),yPos+yOffset-4,xPos+18,yPos+yOffset+4,2,legendColor);
-                name = textOptions.merge({"x":xPos+22,"y":yPos+yOffset+4,"text":series[i]});
+                name = textOptions.merge({"x":xPos+22,"y":yPos+yOffset+4,"text":series[i],"align":"left"});
                 this.drawText(name);
                 yOffset = yOffset + textHeight + 4;
             }
@@ -893,6 +931,46 @@ Rchart.fn.drawLegend =function(){
     }
 
 };
+
+Rchart.fn.drawZeroLine = function(value,color,showLabel,showOnRight,tickWidth,textOptions,freeText){
+    showLabel = typeof(showLabel) !="undefined" ? showLabel : false;
+    showOnRight = typeof(showOnRight) !="undefined" ? showOnRight : false;
+    tickWidth = typeof(tickWidth) !="undefined" ? tickWidth : 4;
+    var labelName = typeof(textOptions) !="undefined" ? textOptions : {};
+    var y = this.gAreaY2 - (value - this.vMin) * this.divisionRatio;
+    this.context.beginPath();
+    if ( !(y <= this.gAreaY1 || y >= this.gAreaY2))
+    {
+        if ( tickWidth == 0 )
+            this.drawLine(this.gAreaX1,y,this.gAreaX2,y,color);
+        else
+            this.drawDottedLine(this.gAreaX1,y+2,this.gAreaX2,y+2,tickWidth,color);
+        if (showLabel )
+        {
+            if ( freeText == null )
+                var   label = value;
+            else
+                var  label = freeText;
+        }
+        var fontSize = typeof(labelName["fontSize"]) !="undefined" ? labelName["fontSize"] : 10;
+        var textColor = typeof(labelName["color"]) !="undefined" ? labelName["color"] : color;
+        labelName = labelName.merge({"text":label,"color":textColor});
+        if(showOnRight)
+        {
+            labelName = labelName.merge({"x":this.gAreaX2+2,"y":y+(fontSize/2)});
+
+            this.drawText(labelName);
+        }
+        else
+        {
+            labelName = labelName.merge({"x":this.gAreaX1+2,"y":y-fontSize/2});
+            this.drawText(labelName);
+
+        }
+    }
+
+
+};
 // Bar Graph Code
 Rchart.fn.drawBarGraph = function(){
 
@@ -901,25 +979,16 @@ Rchart.fn.drawBarGraph = function(){
     var noSeries = bar["values"];
     var width = this.graphWidth();
     var height = this.graphHeight();
-    var lineColor = typeof(this.data['axis']['color']) != 'undefined' ? this.data['axis']['color'] : "#000000";
-    var lineWidth = typeof(this.data['axis']['width']) != 'undefined' ? this.data['axis']['width'] : 1;
-    var drawTick = typeof(this.data['axis']['tick']) != 'undefined' ? this.data['axis']['tick'] : false;
-    var labels = typeof(bar["labels"]) != 'undefined' ? this.findSeriesValues(bar["labels"]): [];
+   
+    
     //set bar and gutter width
     var drawBorder= typeof(bar["border"]) != 'undefined';
     if(drawBorder){
-        var borderColor = bar["border"];
-        var borderWidth =1.5;
+        var borderColor = typeof(bar["borderColor"])!= "undefined" ? bar["borderColor"] : "#ffffff";
+        var borderWidth = typeof(bar["borderWidth"])!= "undefined" ? bar["borderWidth"] : 1;
     }
     var gutterWidth = typeof(bar["gutterWidth"]) != 'undefined' ? bar["gutterWidth"] :10;
 
-    //  var seriesWidth  = @division_width / (series+1)
-    // var serie_x_offset = @division_width / 2 - series_width / 2
-
-    //var unitWidth = Math.round(width/values.length);
-    //var cBarWidth = unitWidth-gutterWidth*2;
-    //TODO Add validation if barwidth is negative then do some % scaling
-    //var barWidth =
     //Find Out Maximum values
     var maxValues =0;
     for(var seriesL=0;seriesL<noSeries.length;seriesL++)
@@ -930,6 +999,11 @@ Rchart.fn.drawBarGraph = function(){
     var unitWidth = Math.round(width/maxValues.length);
     var cBarWidth = unitWidth-gutterWidth*2;
     var barWidth = cBarWidth/noSeries.length;
+    var yZero  = Math.floor(this.gAreaY2 - ((0-this.vMin) * this.divisionRatio));
+    console.log(Math.floor(yZero));
+    if ( yZero> this.gAreaY2 )
+        yZero = this.gAreaY2 ;
+
     for(seriesL=0;seriesL<noSeries.length;seriesL++)
     {
         var values = this.findSeriesValues(noSeries[seriesL]);
@@ -946,21 +1020,24 @@ Rchart.fn.drawBarGraph = function(){
                 //Draw Actual Graph
                 for(var i=0;i<values.length;i++)
                 {
-
+                    //Calculate X1 Position
                     var x1= this.gAreaX1+(unitWidth*(i))+(gutterWidth)+(barWidth*seriesL);
-                    if(this.vMin == values[i])
-                        var y1 =this.gAreaY2-((values[i])*this.divisionRatio);
-                    else
-                        var y1 =this.gAreaY2-((values[i]-this.vMin)*this.divisionRatio);
-
+                    var y1 =this.gAreaY2-((values[i]-this.vMin)*this.divisionRatio);
+                    if(y1==this.gAreaY2)
+                        y1 = this.gAreaY2;
                     var x2= x1+barWidth;
-                    var y2 =this.gAreaY2-2.2;
-                    //y1= (y2-y1)+this.gAreaY1;
+                    var y2 =y1;
+//                    if(y1 == yZero)
+//                        y2 = yZero;
+//                    if(y2>yZero)
+//                        y2= -2.2;
                     this.context.beginPath();
-                    this.drawFilledRectangle(x1+1,y1,x2-1,y2,barColor);
+
+                    this.drawFilledRectangle(x1+1,yZero,x2-1,y1,barColor);
+                    
                     if(drawBorder)
                     {
-                        this.context.beginPath();
+                       
                         this.drawLine(x1,y1,x1,y2+2.2,borderColor,borderWidth);
                         this.drawLine(x1,y1,x2,y1,borderColor,borderWidth);
                         this.drawLine(x2,y1,x2,y2+2.2,borderColor,borderWidth);
@@ -1092,7 +1169,7 @@ function Text(options)
     this.y =   typeof(options.y) != 'undefined' ? options.y : 0;
     this.font =   typeof(options.font) != 'undefined' ? options.font : "Arial";
     this.fontSize = typeof(options.fontSize) != 'undefined' ? options.fontSize : 10;
-    this.align = typeof(options.align) != 'undefined' ? options.align : "left";
+    this.align = typeof(options.align) != 'undefined' ? options.align : "center";
     this.stroke =   typeof(options.stroke) != 'undefined' ? options.stroke : false;
     this.lineWidth =   typeof(options.lineWidth) != 'undefined' ? options.lineWidth : 1;
     this.strokeColor =   typeof(options.strokeColor) != 'undefined' ? options.strokeColor : "#000000";
@@ -1168,4 +1245,59 @@ min = function(n1,n2) {
 function roundOf(num, dec) { // Arguments: number to round, number of decimal places
     return Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
 }
+/* This code add native support to draw dahed line
+ * Many Thanks to
+ * http://davidowens.wordpress.com/2010/09/07/html-5-canvas-and-dashed-lines/
+ * Changes done as per my need
+ * */
 
+CanvasRenderingContext2D.prototype.dashedLineTo = function (fromX, fromY, toX, toY, pattern) {
+    // Our growth rate for our line can be one of the following:
+    //   (+,+), (+,-), (-,+), (-,-)
+    // Because of this, our algorithm needs to understand if the x-coord and
+    // y-coord should be getting smaller or larger and properly cap the values
+    // based on (x,y).
+    var lt = function (a, b) { return a <= b; };
+    var gt = function (a, b) { return a >= b; };
+    var capmin = function (a, b) { return Math.min(a, b); };
+    var capmax = function (a, b) { return Math.max(a, b); };
+
+    var checkX = { thereYet: gt, cap: capmin };
+    var checkY = { thereYet: gt, cap: capmin };
+
+    if (fromY - toY > 0) {
+        checkY.thereYet = lt;
+        checkY.cap = capmax;
+    }
+    if (fromX - toX > 0) {
+        checkX.thereYet = lt;
+        checkX.cap = capmax;
+    }
+
+    this.moveTo(fromX, fromY);
+    var offsetX = fromX;
+    var offsetY = fromY;
+
+    var idx = 0, dash = true;
+    while (!(checkX.thereYet(offsetX, toX) && checkY.thereYet(offsetY, toY))) {
+        var ang = Math.atan2(toY - fromY, toX - fromX);
+        var len = pattern;
+
+        offsetX = checkX.cap(toX, offsetX + (Math.cos(ang) * len));
+        offsetY = checkY.cap(toY, offsetY + (Math.sin(ang) * len));
+
+        if (dash)
+        {
+
+            this.lineTo(offsetX, offsetY);
+        }
+        else
+        {
+            this.moveTo(offsetX, offsetY);
+        }
+
+        idx = (idx + 1) % pattern;
+        dash = !dash;
+    }
+
+};
