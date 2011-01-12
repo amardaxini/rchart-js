@@ -988,9 +988,9 @@ Rchart.fn.drawBarGraph = function(){
         var borderColor = typeof(bar["borderColor"])!= "undefined" ? bar["borderColor"] : "#ffffff";
         var borderWidth = typeof(bar["borderWidth"])!= "undefined" ? bar["borderWidth"] : 1;
     }
-    var gutterWidth = typeof(bar["gutterWidth"]) != 'undefined' ? bar["gutterWidth"] :10;
+  
     if(typeof(bar["gutterWidth"]) != 'undefined')
-        var seriesWidth  = (this.divisionWidth-gutterWidth*this.dataCount) /(noSeries.length+1);
+        var seriesWidth  = (this.divisionWidth-bar["gutterWidth"]*this.dataCount) /(noSeries.length+1);
     else
     var seriesWidth  = (this.divisionWidth) /(noSeries.length+1);
     var seriesXOffset = (this.divisionWidth  / 2 - seriesWidth / 2);
