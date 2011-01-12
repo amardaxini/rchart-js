@@ -989,7 +989,10 @@ Rchart.fn.drawBarGraph = function(){
         var borderWidth = typeof(bar["borderWidth"])!= "undefined" ? bar["borderWidth"] : 1;
     }
     var gutterWidth = typeof(bar["gutterWidth"]) != 'undefined' ? bar["gutterWidth"] :10;
-    var seriesWidth  = this.divisionWidth /(noSeries.length+1);
+    if(typeof(bar["gutterWidth"]) != 'undefined')
+        var seriesWidth  = (this.divisionWidth-gutterWidth*this.dataCount) /(noSeries.length+1);
+    else
+    var seriesWidth  = (this.divisionWidth) /(noSeries.length+1);
     var seriesXOffset = (this.divisionWidth  / 2 - seriesWidth / 2);
     var yZero  = this.gAreaY2 - ((0-this.vMin) * this.divisionRatio);
 
