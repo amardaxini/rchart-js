@@ -31,13 +31,22 @@ function Rchart(id, data)
     this.text= new Text({});
     this.self=this;
     this._intID = 0;
-
+    this.minHeight = 10;
     // The Following is Data for Pie Chart
     this.startAngle = 270;
-
+    this.maxWidth = 10; 
+    this.pieRotation = false
+    this.pieRadius = this.getRadius();
+    this.pieOffset = 0;
+    this.fontSize = 8;
+    this.fontColor = "#666666";
+    this.fontFamily = "san-serif";
     // this.drawGraph(this.data);
     // ADD RDATA/RCHART Default values or required parameter
 }
+
+
+
 Rchart.fn = Rchart.prototype;
 function swap_no(array_el)
 {
@@ -49,15 +58,21 @@ function swap_no(array_el)
 //set boundry of graph
 Rchart.fn.setGraphArea = function(x1,y1,x2,y2)
 {
-    this.gAreaX1 =x1;
-    this.gAreaY1 =y1;
-    this.gAreaX2 =x2;
-    this.gAreaY2 =y2;
+    this.gAreaX1 = x1;
+    this.gAreaY1 = y1;
+    this.gAreaX2 = x2;
+    this.gAreaY2 = y2;
 };
 
 // ADD MORE OPTION LIKE GRADIENT PALLETE/OR MORE OPTION TO DRAW
 // GRADIENT BACKGROUND OF IMAGE etc..
-
+Rchart.fn.getRadius = function()
+{
+  var minValue =  min(this.canvas.width,this.canvas.height);    
+  // taking the radius in ratio of 4 : 1 of the minValue
+  var radius = parseInt(minValue/4);
+  return radius;
+}
 //draw line  paassing starting coordinate (x1,y1) and ending coordinate (x2,y2)
 Rchart.fn.drawLine = function(x1, y1, x2, y2, color,width)
 {
@@ -732,6 +747,7 @@ Rchart.fn.drawText = function(options){
     this.context.restore();
 
 };
+
 Rchart.fn.drawTitle= function(x_pos,yPos,value,r,g,b,x_pos2,yPos2,shadow)
 {
     //set default value
@@ -750,6 +766,7 @@ Rchart.fn.calculateLabels = function(values){
 
     }
 };
+
 Rchart.fn.findSeriesValues= function(name,key)
 {
     var values;
@@ -772,59 +789,231 @@ Rchart.fn.findSeriesValues= function(name,key)
 
 Rchart.fn.drawPieGraph = function() {
     var pieSeries = this.data["graph"]["pie"]["values"];
-
+    // data of pieSeries
     var pieSeriesValue = this.findSeriesValues(pieSeries);
-
+    
+    var fontData = this.findSeriesValues(pieSeries,"font") 
+   
+    this.fontSize = typeof(fontData["size"]) == "undefined" ? this.fontSize : parseInt(fontData["size"]);
+    
+    this.fontFamily = typeof(fontData["family"]) == "undefined" ? this.fontFamily : fontData["family"];
+    
+    this.fontColor = typeof(fontData["color"]) == "undefined" ? this.fontColor : fontData["color"];
+    
+    // color for pie series section   
     var pieSeriesColor = this.findSeriesValues(pieSeries,"color");
-
+   
     // The Amount the degree the Pie Should be shifted from starting point
     var pieOffset = this.findSeriesValues(pieSeries,"offset");
-
-    var pieRotation = this.findSeriesValues(pieSeries,"rotation");
-
-    var pieLabels  = this.findSeriesValues(pieSeries,"label");
+    // rotation of the pie Series in clockwise and anticlockwise 
+    // TODO
+    // need to be removed
+   // var pieRotation = this.findSeriesValues(pieSeries,"rotation");
+    this.minHeight = this.setMinHeight();     
 
     var pieLegend =  this.findSeriesValues(pieSeries,"legend");
 
+    // radius of the pie Circle that need to be drawn
     var pieRadius =  this.findSeriesValues(pieSeries,"radius");
+   
+    var background = this.findSeriesValues(pieSeries,"background"); 
+    // default pie off set is set to -30
+    this.pieOffset = typeof(pieOffset) == "undefined" ? this.pieOffset : pieOffset;
 
-    var pieOffset = typeof(pieOffset) == "undefined" ? 0 : pieOffset;
 
-    var pieRotation = typeof(pieRotation) == "undefined" ? true : pieRotation;
+   // var pieRotation = typeof(pieRotation) == "undefined" ? false : pieRotation;
 
     var pieLegend =   typeof(pieLegend) == "undefined" ? false : pieLegend;
-
-    var pieRadius = typeof(pieRadius) == "undefined" ? this.setPieRadius : pieRadius;
-
+    // set pieRadius if not set
+    this.pieRadius = typeof(pieRadius) == "undefined" ? this.pieRadius : pieRadius;
+    // check whether the data is a percent of not get the percent
+    
     var total  =  this.pieTotal(pieSeriesValue);
-
-
-    this.setGraphArea(0,0,this.canvas.width,this.canvas.height);
-    this.drawGraphArea("rgb(255,255,255)",true);
+    
+    if (background) {
+      this.setGraphArea(0,0,this.canvas.width,this.canvas.height);
+      this.drawGraphArea("rgb(255,255,255)",true);
+    }  
     this.findCenter(this.canvas.width,this.canvas.height)
-    this.startAngle +=  pieOffset;
-    var startAngle = this.startAngle
-    console.log(pieOffset);
-    console.log(pieRotation);
-    console.log(total);
-    console.log(startAngle);
-    for (var i=0; i < pieSeriesValue.length ; i++) {
-        this.context.beginPath();
-        this.context.moveTo(this.gCenterX,this.gCenterY);
-        this.context.fillStyle = pieSeriesColor[i] ;
-        if (i != pieSeriesValue.length-1)
-            var endAngle = startAngle + (pieSeriesValue[i]/total)*360;
-        else
-            var endAngle = this.startAngle;
-        this.context.arc(this.gCenterX,this.gCenterY,pieRadius,(Math.PI/180)*startAngle,(Math.PI/180)*endAngle,pieRotation)
-        startAngle = endAngle;
-        this.context.fill();
-    }
-
-
+    this.startAngle +=  this.pieOffset;
+    var startAngle = this.startAngle;
+     
+    this.drawPie(pieSeriesValue,pieSeriesColor,startAngle,this.startAngle,total); 
+    this.drawPieLabel(pieSeriesValue,startAngle,this.startAngle,total)
+   
 
 };
 
+Rchart.fn.drawPie = function(data,colors,startAngle,finalAngle,total) {
+  
+   for (var i=0;i < data.length; i++) { 
+    if (i!= data.length-1) 
+      var endAngle = startAngle + (data[i]/total)*360;
+    else   
+      var endAngle = finalAngle;
+   this.drawArc(colors[i],startAngle,endAngle);  
+   startAngle = endAngle;      
+  }
+}   
+
+Rchart.fn.drawArc = function(color,startAngle,endAngle) {
+   
+    this.context.beginPath();
+    this.context.moveTo(this.gCenterX,this.gCenterY);
+    this.context.fillStyle = color;
+    this.context.arc(this.gCenterX,this.gCenterY,this.pieRadius,(Math.PI/180)*startAngle,(Math.PI/180)*endAngle,this.pieRotation);
+    this.context.fill();   
+}
+
+
+Rchart.fn.drawPieLabel = function(data,startAngle,finalAngle,total) {
+   var previousY = 0;
+   
+   var previousAngle = 0;
+   // labels of the pie chart 
+   var tickRadius = this.pietickRadius();
+   // the Radius of the Tick Draw for center of each sector of the arc
+   var labelRadius = this.labelRadius();
+   // label Radius
+   var pieSeries = this.data["graph"]["pie"]["values"];
+   
+   var pieLabels  = this.findSeriesValues(pieSeries,"label");
+   
+   for (var i=0;i < data.length; i++) { 
+     if (i!= data.length-1) 
+       var endAngle = startAngle + (data[i]/total)*360;
+     else   
+       var endAngle = finalAngle;  
+       
+    var arcCenter = this.arcCenterAngle(startAngle,endAngle);
+    
+    var tickXYinitial = this.tickXY(this.gCenterX,this.gCenterY,this.pieRadius,arcCenter);
+    
+    
+    
+    var tickXYfinal = this.tickXYendpt(tickXYinitial[0],tickXYinitial[1],tickRadius,arcCenter);
+        
+    this.drawpieTick(tickXYinitial[0],tickXYinitial[1],tickXYfinal[0],tickXYfinal[1]);
+    
+    previousY = this.drawLabel(arcCenter,tickXYfinal[0],tickXYfinal[1],previousY,previousAngle,pieLabels[i],labelRadius);    
+    
+    previousAngle = arcCenter;
+    
+    startAngle = endAngle;
+    }
+}
+
+Rchart.fn.setMinHeight = function() {
+  return parseInt(this.fontSize) + 2
+
+}
+
+Rchart.fn.arcCenterAngle = function(startAngle,endAngle) {
+    if (startAngle >= endAngle) 
+      var temp  = 360 - startAngle;
+    else 
+      var temp = startAngle;    
+      
+    var angleBisectAt = (temp+endAngle)/2 ;
+    
+    angleBisectAt  = (startAngle >= endAngle) ? ((angleBisectAt+startAngle) >= 360  ? ((angleBisectAt +startAngle) - 360) : (angleBisectAt + startAngle)) : angleBisectAt;    
+    
+    return angleBisectAt;
+}
+
+Rchart.fn.tickXY = function(X,Y,radius,centerAngle) {
+   return [(X + radius*(Math.cos((Math.PI/180)*centerAngle))),(Y + radius*(Math.sin((Math.PI/180)*centerAngle)))];
+}
+
+Rchart.fn.tickXYendpt = function(X,Y,radius,centerAngle) {
+  var tickendptcoordinate = this.tickXY(X,Y,radius,centerAngle)
+  return tickendptcoordinate;
+}
+
+Rchart.fn.pietickRadius = function() {
+  return parseInt(this.pieRadius * 0.15);
+}
+Rchart.fn.drawpieTick = function(X,Y,X1,Y1) {
+   this.context.beginPath();
+   this.context.moveTo(X,Y);
+   this.context.lineTo(X1,Y1);
+   this.context.strokeStyle = "#000000";
+   this.context.stroke();
+}
+
+
+Rchart.fn.drawLabel = function(arcCenter,X,Y,previousY,previousAngle,text,labelRadius) {
+ 
+   this.context.moveTo(X,Y)  
+   arcCenter = arcCenter > 360 ? arcCenter - 360 : arcCenter;
+    if ((arcCenter >= 270 || arcCenter <= 90)) 
+      var operator =   1; 
+    else 
+      var operator =  -1 ;
+    
+    if (previousY == 0 && previousAngle == 0 ) 
+      var distance = this.minHeight;
+    else 
+      var distance = previousY - Y; 
+        
+     distance = Math.abs(distance);   
+             
+    
+    if ((arcCenter >= 270 || arcCenter <= 90)) {
+      
+      
+      Y = (distance >= this.minHeight) ? ((Y > previousY) ? Y : previousY + this.minHeight): (previousY + this.minHeight);
+      }
+    else if (arcCenter > 90 && arcCenter <= 90) {
+    
+        Y = Y; 
+      } 
+      else {
+     
+        Y = (distance >= this.minHeight) ? ((Y < previousY) ? Y : previousY - this.minHeight): (previousY - this.minHeight);
+     } 
+      
+      
+     var X = this.findX(this.gCenterX,this.gCenterY,Y,operator,labelRadius);
+     
+     X =  typeof(X) == "undefined" ? ((operator == 1) ? (this.gCenterX + labelRadius) : (this.gCenterX - labelRadius)) : X
+     
+     var Y = Y; 
+     
+     this.context.lineTo(X,Y);
+     this.context.strokeStyle = "#000000";
+     this.context.stroke();
+     this.drawPieText(X,Y,arcCenter,text);
+     return Y;
+    
+}
+
+Rchart.fn.findX = function(X,Y,Y1,alignment,labelRadius) {
+ // var radius = (typeof(radius) == "undefined") ? this.labelRadius() : radius;
+ var radius = labelRadius;
+ 
+  Y1 = (Y1 > (radius+Y)) ? (radius + Y) : (Y1 < (Y-radius) ? (Y-radius) : Y1);
+  var inverseAngle  = Math.asin((Y1 - Y)/radius);
+  return X + alignment*radius*(Math.cos((Math.PI/180)*inverseAngle));                
+ }
+  
+Rchart.fn.labelRadius = function() {
+  return parseInt(this.definePieRadius()); 
+}  
+       
+Rchart.fn.drawPieText = function(X,Y,arcCenter,text) {
+    this.context.beginPath();
+    
+    this.context.font = this.fontSize+"pt "+ this.fontFamily;         
+    //alert(context.measureText(text));
+    //var textWidth =  context.measureText(text);
+    X = (arcCenter > 90 && arcCenter <= 270) ? (X - (this.context.measureText(text).width + 4)): (X + 3) 
+    //var textShift = 50 * operator;
+    this.context.strokeText(text,X,Y+4);
+    this.context.strokeStyle = this.fontColor;
+    this.context.closePath();
+}   
+    
 Rchart.fn.pieTotal = function(seriesValue) {
     var total = 0;
     var i = 0 ;
@@ -841,7 +1030,7 @@ Rchart.fn.pieTotal = function(seriesValue) {
 };
 
 Rchart.fn.definePieRadius = function() {
-    min([this.width,this.height]) - 5;
+    return ((this.pieRadius*5)/4);
 };
 
 Rchart.fn.findCenter = function(width,height) {
@@ -1137,6 +1326,7 @@ Rchart.fn.drawGraph = function()
                 {
 
                     this.drawPieGraph();
+                    
 
                 }
             }

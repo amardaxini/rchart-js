@@ -171,7 +171,36 @@ createLinearGradientPalette(x1,y1,x2,y2,startColor,endColor)
  tickWidth is dotSize Of line if 1 then draw Plain Line else plot dotted line
  textOptions TextOptions for label
 
+#  Pie Graph
+  ## Provide the Series 
+     var x = {
 
+        "series":[
+          {
+            "name" :  "series1", // name of the series
+            "background" : true,  // backgound required (support for custom background not yet implemented)      
+            "value":  [3,1,2,8,5]
+            "color": ["#AA2030","#20AA30","#0203DD","#A2F3F2","#2DA2D3"], // pie series Color *support for custom color not currenlty implemented
+            "offset" : 0, // the angle to which the pie should move   
+            "radius" : 100 , // radius of the pie  [optional] 
+            // "slice" : 3, // slice the given sector(not yet implemented) 
+            "font" : {  // set the font styling for the label of the pie [optional]
+                       "size" : "7", // size of the label of font
+                       "family" : "Arial", // font-style of the lable of pie
+                       "color" : "#666666" // font-color of label of the pie [
+                     } , 
+            "label" : ["Chrome","Opera","Safari","Firefox","IE"] // label of the Pie Series
+            
+          },
+          
+        "legend":{}, // Not Yet implemented
+        "graph" :{
+          "pie":{
+            "values" : ["series1"],
+          },
+          
+        }
+      };
     
 
 

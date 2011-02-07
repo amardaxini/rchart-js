@@ -10,53 +10,34 @@
 
         "series":[
           {
+            
             "name" :  "series1",
-            "value":  [3,1,2,3,8],
-            "color": ["#AA2030","#20AA30","#0203DD","#A2F3F2","#2DA2D3"],
-            "offset" : -30,
-            "rotation" : false ,
-            "legend" : true,
-            "radius" : 150 ,
-            "label" : ["Chrome","Opera","Safari","Firefox","IE"]
+            "background" : true,        
+            "value":  [3,1,2,3,3,4,1,3,1,2,4,5,2,3,4,2,5,1,3,2,4,3,2,4,1,1,5,3,2,3],
+            "color": ["#AA2030","#20AA30","#0203DD","#A2F3F2","#2DA2D3","#11E2D2","#8AD123","#C2D200","#8AD123","#00DD00","#AADF32","#AD3613","#9F536D","#4FD3CC","#1FF231","#67FD2A","#C5D877","#6FD3C2","#EEF3C3","#21321A","#D1DC88","#F824C1","#DEE2A1","#1256C1","#87CC44","#1C21DA","#99AAC1","#A3D3C2","#61D2C3","#D3D1C1"],
+            "offset" : 0,
+            "legend" : false,
+            "radius" : 100 ,
+            "slice" : 3,
+            "font" : {
+                       "size" : "7",
+                       "family" : "Arial",
+                       "color" : "#FF0000"
+                     } , 
+            //"label" : ["Chrome","Opera","Safari","Firefox","IE"]
+            "label" : [ "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","AA","BB","XX","CC"]
+
           },
           
-        //  {
-        //    "name":"series2",
-        //    "value":[2,4,6,8],
-        //    "color":"#7798BF"
-        //  },
-          
-        //  {
-        //    "name":"series4",
-        //    "value":[0,1,3,4,5],
-        //    "color":"#55BF3B"
-        //  },
-          
-        //  {
-        //    "name":"series3",
-        //    "value":["Jan","Feb","March","April","May"]
-        //  }
+     
         ],
-        //"xLabelSeries":"series3",
-       // "axis" :
-       // {
-          // Text Options In General
-          // "text" : "Text","font" : "Arial 10pt","stroke" : true,
-          // "strokeColor" : "#000000","lineWidth" : "#000000","align": "center"
-      //    "x":{"value":{"text":"Name Of x axis"}},
-      //    "xLabel":{"values":"labelSeries"},
-      //    "y":{"value":{"text":"Name Of y AXIS dsdsdd d sdd dd dhshds dsd"}}
-      //  },
+        
 
         "legend":{},
         "graph" :{
           "pie":{
             "values" : ["series1"],
-            //"gutterWidth": 10,
-       
-            "labels":"series3"
-            //             "border":"#aaeeee"
-            //"color" : ["#DDDF0D", "#7798BF", "#55BF3B", "#DF5353", "#aaeeee"]
+    
           },
           
         }
