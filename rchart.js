@@ -963,7 +963,8 @@ Rchart.fn.drawLabel = function(arcCenter,X,Y,previousY,previousAngle,text,labelR
     if ((arcCenter >= 270 || arcCenter <= 90)) {
       
       
-      Y = (distance >= this.minHeight) ? ((Y > previousY) ? Y : previousY + this.minHeight): (previousY + this.minHeight);
+     // Y = (distance >= this.minHeight) ? ((Y > previousY) ? Y : previousY + this.minHeight): (previousY + this.minHeight);
+        Y = (distance >= this.minHeight) ?  Y : (previousY + this.minHeight);
       }
     else if (arcCenter > 90 && arcCenter <= 90) {
     
@@ -971,7 +972,8 @@ Rchart.fn.drawLabel = function(arcCenter,X,Y,previousY,previousAngle,text,labelR
       } 
       else {
      
-        Y = (distance >= this.minHeight) ? ((Y < previousY) ? Y : previousY - this.minHeight): (previousY - this.minHeight);
+      //  Y = (distance >= this.minHeight) ? ((Y < previousY) ? Y : previousY - this.minHeight): (previousY - this.minHeight);
+        Y = (distance >= this.minHeight) ? Y : (previousY - this.minHeight);
      } 
       
       
